@@ -154,6 +154,12 @@ import Foundation
         }
     }
     
+    public var indicatorViewShadowLightPosition: BetterSegmentedIndicatorViewLightPosition? {
+        didSet {
+            self.layoutIfNeeded()
+        }
+    }
+    
     // MARK: Private properties
     private let normalSegmentsView = UIView()
     private let selectedSegmentsView = UIView()
@@ -244,6 +250,12 @@ import Foundation
             let frame = elementFrame(forIndex: UInt(index))
             normalSegmentsView.subviews[index].frame = frame
             selectedSegmentsView.subviews[index].frame = frame
+        }
+        
+        // Draw indicator shadow if needed
+        if let position = indicatorViewShadowLightPosition {
+            self.layer.masksToBounds = false
+            self.indicatorView.drawShadow(lightPosition: position, shadowColor: UIColor.black.withAlphaComponent(0.5), shadowSize: 3, scale: true)
         }
     }
     open override func prepareForInterfaceBuilder() {
@@ -356,6 +368,8 @@ import Foundation
         default: break
         }
     }
+    
+    
 }
 
 // MARK: - UIGestureRecognizerDelegate
@@ -365,5 +379,67 @@ extension BetterSegmentedControl: UIGestureRecognizerDelegate {
             return indicatorView.frame.contains(gestureRecognizer.location(in: self))
         }
         return super.gestureRecognizerShouldBegin(gestureRecognizer)
+    }
+}
+
+// Define the postion of the light.
+// topLeft: right and bottom shadow
+// top: left, bottom and right shadow
+// topRight: left and bottm shadow
+// right: top, left and bottom shadow
+// ...
+// zAxis: all direction shadow
+public enum BetterSegmentedIndicatorViewLightPosition {
+    case topLeft, top, topRight, right, bottomRight, bottom, bottomLeft, left, zAxis
+}
+
+
+extension UIView {
+    // Draw outer shadow depends on the postion of light.
+    func drawShadow(lightPosition:BetterSegmentedIndicatorViewLightPosition = .top, shadowColor:UIColor = UIColor.darkGray, shadowSize:CGFloat = 2.0, scale: Bool = true) {
+        // Setup shaodow color
+        self.layer.shadowColor = shadowColor.cgColor
+        
+        // Setup shadow size
+        self.layer.shadowRadius = shadowSize   // Will assign to shadow radius, which indicate the shadow size with gradient effect
+        
+        // Setup shadow position depends on light
+        var x:CGFloat = 0, y:CGFloat = 0
+        switch lightPosition {
+        case .topLeft:
+            x = shadowSize
+            y = shadowSize
+        case .top:
+            x = 0
+            y = shadowSize
+        case .topRight:
+            x = -shadowSize
+            y = shadowSize
+        case .right:
+            x = -shadowSize
+            y = 0
+        case .bottomRight:
+            x = -shadowSize
+            y = -shadowSize
+        case .bottom:
+            x = 0
+            y = -shadowSize
+        case .bottomLeft:
+            x = shadowSize
+            y = -shadowSize
+        case .left:
+            x = shadowSize
+            y = 0
+        case .zAxis:
+            x = 0
+            y = 0
+        }
+        self.layer.shadowOffset = CGSize(width: x, height: y)
+        
+        // Other setups
+        self.layer.shouldRasterize = true
+        self.layer.masksToBounds = false
+        self.layer.shadowOpacity = 0.8
+        self.layer.rasterizationScale = scale ? UIScreen.main.scale : 1
     }
 }

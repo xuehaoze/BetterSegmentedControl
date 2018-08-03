@@ -12,6 +12,7 @@ import BetterSegmentedControl
 class ViewController: UIViewController {
     
     @IBOutlet weak var control1: BetterSegmentedControl!
+    @IBOutlet weak var control2: BetterSegmentedControl!
     @IBOutlet weak var control3: BetterSegmentedControl!
     
     // MARK: - Examples
@@ -37,6 +38,8 @@ class ViewController: UIViewController {
                                                   normalFont: UIFont(name: "HelveticaNeue-Light", size: 13.0)!,
                                                   selectedFont: UIFont(name: "HelveticaNeue-Medium", size: 13.0)!)
         // Control 2: Exclusively defined in IB
+        control2.backgroundColor = UIColor.white
+        control2.indicatorViewShadowLightPosition = BetterSegmentedIndicatorViewLightPosition.top
         
         // Control 3: Many options
         control3.segments = LabelSegment.segments(withTitles: ["One","Two","Three","Four","Five","Six"],
